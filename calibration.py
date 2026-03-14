@@ -1,3 +1,15 @@
+"""
+Calibration script for the load cell. Sets the units to grams and computes a scale factor, by which
+the raw reading of the load cell is divided by.
+
+This code contains the HX711 amplifier library created by Robert Hammelrath, which can be found
+in the following link: https://github.com/robert-hh/hx711 
+
+"""
+
+
+
+
 from machine import Pin
 from hx711_gpio import HX711
 import time
