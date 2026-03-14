@@ -20,6 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
+# This library was created by Robert Hammelrath, which can be found here: https://github.com/robert-hh/hx711/tree/master
+
 from machine import enable_irq, disable_irq, idle, Pin
 import time
 
