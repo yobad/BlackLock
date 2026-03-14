@@ -1,3 +1,20 @@
+"""
+This code makes the load cell continuously read the weight that is placed above it,
+while printing it out. If the weight placed on it is above a certain threshold, the stepper
+motor will be triggered to close the door of the box. After a certain time has elapsed
+(study session length), the motor will be triggered again in the opposite direction to open the
+door.
+
+This code uses the HX711 amplifier library created by Robert Hammelrath, which can be found in the
+following link: https://github.com/robert-hh/hx711
+It also uses a stepper motor library created by Lars Kellog Stedman, which can be found in the
+following link: https://github.com/larsks/micropython-stepper-motor
+
+"""
+
+
+
+
 import time
 from hx711_gpio import HX711
 from machine import Pin
