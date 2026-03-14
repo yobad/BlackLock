@@ -7,7 +7,7 @@ door.
 
 This code uses the HX711 amplifier library created by Robert Hammelrath, which can be found in the
 following link: https://github.com/robert-hh/hx711
-It also uses a stepper motor library created by Lars Kellog Stedman, which can be found in the
+It also uses a stepper motor library created by Lars Kellog-Stedman, which can be found in the
 following link: https://github.com/larsks/micropython-stepper-motor
 
 """
