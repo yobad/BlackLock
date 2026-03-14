@@ -1,3 +1,9 @@
+"""
+This library was created by Lars Kellog-Stedman, which can be found
+here: https://github.com/larsks/micropython-stepper-motor/tree/main
+"""
+
+
 import time
 
 import machine
