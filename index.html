@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>BlackLock Phone Lock</title>
+
+<style>
+
+body{
+    background:black;
+    color:#00ffcc;
+    font-family:monospace;
+    text-align:center;
+    margin-top:80px;
+}
+
+#clock{
+    font-size:70px;
+}
+
+button{
+    padding:12px 20px;
+    margin:10px;
+    font-size:16px;
+}
+
+input{
+    padding:5px;
+    font-size:18px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>BlackLock</h1>
+
+<div id="clock">00:00:00 AM</div>
+
+<br><br>
+
+<h3>Set Start Time</h3>
+<input type="time" id="startTime">
+
+<h3>Lock Duration (minutes)</h3>
+<input type="number" id="duration" min="1">
+
+<br><br>
+
+<button onclick="confirmPhone()">Phone Placed In Box</button>
+<button onclick="connectPico()">Connect Lock</button>
+<button onclick="emergencyUnlock()">Emergency Unlock</button>
+
+<p id="status">Waiting for schedule...</p>
+
+<audio id="alarmSound"
+src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
+
+<script>
+
+let startTime = null
+let lockDuration = 0
+let phonePlaced = false
+let timerStarted = false
+let unlockTime = null
+
+let picoDevice
+let picoCharacteristic
+
+function updateClock(){
+
+    const now = new Date()
+
+    let hours = now.getHours()
+    let minutes = String(now.getMinutes()).padStart(2,'0')
+    let seconds = String(now.getSeconds()).padStart(2,'0')
+
+    let period = "AM"
+
+    if(hours >= 12){
+        period = "PM"
+    }
+
+    hours = hours % 12
+    if(hours === 0) hours = 12
+
+    hours = String(hours).padStart(2,'0')
+
+    document.getElementById("clock").textContent =
+    `${hours}:${minutes}:${seconds} ${period}`
+
+
+    checkStartTime(now)
+    checkUnlock(now)
+
+}
+
+setInterval(updateClock,1000)
+
+function checkStartTime(now){
+
+    startTime = document.getElementById("startTime").value
+
+    if(!startTime) return
+
+    let currentCheck =
+    now.getHours() + ":" + String(now.getMinutes()).padStart(2,'0')
+
+    if(currentCheck === startTime && !phonePlaced){
+
+        document.getElementById("alarmSound").play()
+
+        document.getElementById("status").textContent =
+        "Put phone in the box!"
+
+    }
+
+}
+
+function confirmPhone(){
+
+    phonePlaced = true
+
+    lockDuration =
+    document.getElementById("duration").value
+
+    let now = new Date()
+
+    unlockTime =
+    new Date(now.getTime() + lockDuration*60000)
+
+    timerStarted = true
+
+    document.getElementById("status").textContent =
+    "Phone locked. Timer started."
+
+    sendCommand("LOCK")
+
+}
+
+function checkUnlock(now){
+
+    if(!timerStarted) return
+
+    if(now >= unlockTime){
+
+        document.getElementById("status").textContent =
+        "Timer finished. Box unlocked."
+
+        sendCommand("UNLOCK")
+
+        timerStarted = false
+
+    }
+
+}
+
+function emergencyUnlock(){
+
+    document.getElementById("status").textContent =
+    "Emergency unlock activated"
+
+    sendCommand("EMERGENCY_UNLOCK")
+
+}
+
+async function connectPico(){
+
+    try{
+
+        picoDevice =
+        await navigator.bluetooth.requestDevice({
+            acceptAllDevices:true,
+            optionalServices:["12345678-1234-1234-1234-123456789abc"]
+        })
+
+        const server = await picoDevice.gatt.connect()
+
+        const service =
+        await server.getPrimaryService(
+        "12345678-1234-1234-1234-123456789abc"
+        )
+
+        picoCharacteristic =
+        await service.getCharacteristic(
+        "abcd1234-5678-1234-5678-abcdef123456"
+        )
+
+        document.getElementById("status").textContent =
+        "Connected to lock"
+
+    }
+
+    catch(error){
+        console.log(error)
+    }
+
+}
+
+async function sendCommand(command){
+
+    if(!picoCharacteristic) return
+
+    const encoder = new TextEncoder()
+
+    await picoCharacteristic.writeValue(
+        encoder.encode(command)
+    )
+
+}
+
+</script>
+
+</body>
+</html>
