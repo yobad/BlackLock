@@ -1,11 +1,11 @@
 import network
 import time
 import socket
-
+import os
 state = "off"
 
 ssid = "ssid" #change to the name of the network
-password = "password"
+password = "password" #change to the password of the network
 
 def connect_to_wifi():
     wlan = network.WLAN(network.STA_IF)
@@ -19,24 +19,46 @@ def connect_to_wifi():
 def open_socket():
     adress = socket.getaddrinfo("0.0.0.0", 80)[0][-1]
     s = socket.socket()
-    s.bind(adress)
+
+    try:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    except Exception:
+        pass  # not supported on some MicroPython ports
+
+    try:
+        s.bind(adress)
+    except OSError as e:
+        s.close()
+        if hasattr(e, 'args') and e.args and e.args[0] == 98:
+            print("Address already in use, retrying...")
+            time.sleep(1)
+            return open_socket()
+        raise
+
     s.listen(3)
     return s
 
+
 def web_page():
-    html = """<!DOCTYPE html>
-    <html>
-    <head>
-        <title>ESP32 Web Server</title>
-    </head>
-    <body>
-        <h1>Hello, World!</h1>
-        <p>This is a simple web page served by the ESP32.</p>
-        <p> I can write anything I want here, and it will be displayed on the webpage. </p>
-        <p>State: {}</p>
-    </body>
-    </html>""".format(state)
+    html = None
+    
+    try:
+        with open('index.html', "r") as f:
+            html = f.read()
+        print(html) 
+    except OSError:
+        pass
+
+    if html is None:
+        html = """
+        <!DOCTYPE html>
+        <html><head><title>Error</title></head><body>
+        <h1>Error loading index.html</h1>
+        <p>File was not found in expected locations.</p>
+        </body></html>
+        """
     return html
+
 connect_to_wifi()
 
 s = open_socket()
