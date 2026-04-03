@@ -18,7 +18,7 @@ def mount_sd():
                           mosi=machine.Pin(19),
                           miso=machine.Pin(16))
         sd = sdcard.SDCard(spi, cs)
-        vfs_obj = vfs.VfsFat(sd)
+        vfs_obj = vfs.VfsFat(sd) # type: ignore
         vfs.mount(vfs_obj, "/sd")
         print("SD card mounted successfully")
         print("Files on SD card:", os.listdir("/sd"))
@@ -53,7 +53,7 @@ def play_wav(filename):
             
             print(f"WAV info: {sample_rate}Hz, {channels} channels, {bits_per_sample} bits")
             
-            if bits_per_sample != 16:
+            if bits_per_sample != 8:
                 raise ValueError("Only 16-bit WAV files supported")
             
             # Calculate delay between samples
@@ -101,6 +101,6 @@ def play_wav(filename):
 
 # Play your file
 if mount_sd():
-    play_wav("/sd/encouragement1.wav")
+    play_wav("/sd/OPencouragement.wav")
 else:
     print("Cannot play WAV: SD card not mounted")
