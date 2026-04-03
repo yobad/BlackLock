@@ -1,6 +1,8 @@
 import machine
 import sdcard
 import vfs
+import os
+
 
 # CS pin location
 cs = machine.Pin(17, machine.Pin.OUT)
@@ -23,11 +25,4 @@ sd = sdcard.SDCard(spi, cs)
 vfs_obj = vfs.VfsFat(sd)  # type: ignore
 vfs.mount(vfs_obj, "/sd")
 
-# Create a file and write to it
-with open("/sd/test.txt", "w") as f:
-    f.write("Hello, SD card!")
-
-# Read the file back
-with open("/sd/test.txt", "r") as f:
-    content = f.read()
-    print(content)
+print("Files on SD card:", os.listdir("/sd"))
