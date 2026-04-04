@@ -25,7 +25,7 @@ def mount_sd():
 def play_wav_8bit(filename):
     global audio_pin
     audio_pin = machine.PWM(machine.Pin(22))
-    audio_pin.freq(100000)  # 100kHz carrier
+    audio_pin.freq(20000)  # 16kHz carrier
 
     try:
         with open(filename, "rb") as f:
@@ -35,12 +35,12 @@ def play_wav_8bit(filename):
                 raise ValueError("Not a WAV file")
 
             sample_rate = int.from_bytes(hdr[24:28], "little")
-            delay_us = int(1000000 / sample_rate)
+            delay_us = int(500000 / sample_rate)
             print("sample_rate", sample_rate, "delay_us", delay_us)
 
             # Using 8-bit WAV data (0..255)
             while True:
-                chunk = f.read(1024)
+                chunk = f.read(100)
                 if not chunk:
                     break
                 for byte in chunk:
@@ -51,9 +51,9 @@ def play_wav_8bit(filename):
         print("Error:", e)
     finally:
         if audio_pin:
-            audio_pin.duty_u16(32768)
+            audio_pin.duty_u16(0)  # Midpoint for silence
             audio_pin.deinit()
             audio_pin = None
 
 if mount_sd():
-    play_wav_8bit("/sd/OPencouragement.wav")
+    play_wav_8bit("/sd/motivation2.wav")
