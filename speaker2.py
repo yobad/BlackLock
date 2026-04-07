@@ -51,7 +51,7 @@ def play_wav_8bit(filename):
         print("Error:", e)
     finally:
         if audio_pin:
-            audio_pin.duty_u16(0)  
+            audio_pin.duty_u16(0)  # Midpoint for silence
             audio_pin.deinit()
             audio_pin = None
 
