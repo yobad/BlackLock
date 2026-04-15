@@ -1,7 +1,8 @@
 """
 Description: Main project file of BlackLock project.
 Date: Apr 14, 2026
-Author: Youmna Badawy
+Author: The BlackLock Team 
+https://claude.ai/share/9485b631-bc30-4606-8e16-da5940993260
  
 Architecture:
   - Pico W creates a Wi-Fi hotspot (AP mode)

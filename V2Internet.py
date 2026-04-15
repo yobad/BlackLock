@@ -3,6 +3,7 @@
 BlackLock - Connection Test (No Hardware Modules)
 Tests WiFi hotspot + web server only.
 Upload this as main.py temporarily, along with your index.html.
+https://claude.ai/share/9485b631-bc30-4606-8e16-da5940993260
 """
  
 import asyncio
