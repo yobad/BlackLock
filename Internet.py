@@ -13,6 +13,7 @@ from machine import Pin, I2C
 from time import localtime, sleep
 from pico_i2c_lcd import I2cLcd
 
+
 I2C_NUM_ROWS = 2
 I2C_NUM_COLS = 16
 
