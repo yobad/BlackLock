@@ -348,7 +348,10 @@ async def lcd_task():
             display_ip = not display_ip
         await asyncio.sleep(2)
  
-# ── Weight / session management task ─────────────────────────────────────────
+#---------------------------------------------------------------------------------------------------------
+#WEIGHT SENSOR AND SESSION LOGIC TASK
+#This code defines the main logic for monitoring the weight sensor and 
+# managing the study session state. (kind of the "brain" of the BlackLock)
 async def weight_and_session_task():
     """
     Core logic task — runs forever alongside the web server.
@@ -420,7 +423,8 @@ async def weight_and_session_task():
  
         await asyncio.sleep(5)   # check every 5 s when idle
  
-# ── Entry point ───────────────────────────────────────────────────────────────
+# the main function to start the access point, launch the web server,
+# and run all tasks concurrently
 async def main():
     state["ip"] = create_ap(SSID, PASSWORD)
     if not state["ip"]:
@@ -440,7 +444,7 @@ async def main():
     )
     # `server` runs in the background automatically once awaited above
  
- 
+ # It ensures our code starts correctly and handles unexpected, exits gracefully.
 if __name__ == "__main__":
     try:
         asyncio.run(main())
