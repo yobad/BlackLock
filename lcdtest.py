@@ -63,8 +63,10 @@ def lcd_show(line1="", line2=""):
 # ─────────────────────────────────────────────────────────────────────────────
 # CASE 1: Session info appears on LCD
 # ─────────────────────────────────────────────────────────────────────────────
-SESSION_MINUTES = int(input("Enter session length in minutes (for testing, use we recommend using 1): ").strip())
-
+SESSION_MINUTES = int(input("Enter session length in minutes (positive integer) (for testing, use we recommend using 1): ").strip())
+if SESSION_MINUTES <= 0:
+    print("Invalid session length. Please enter a positive integer.")
+    raise ValueError("Session length must be a positive integer.")
 print("=" * 50)
 print(f"CASE 1: Display session info on LCD")
 print(f"  Expected LCD line 1: 'Session:{SESSION_MINUTES}min'")
