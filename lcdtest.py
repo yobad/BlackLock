@@ -63,9 +63,11 @@ def lcd_show(line1="", line2=""):
 # ─────────────────────────────────────────────────────────────────────────────
 # CASE 1: Session info appears on LCD
 # ─────────────────────────────────────────────────────────────────────────────
+SESSION_MINUTES = int(input("Enter session length in minutes (for testing, use we recommend using 1): ").strip())
+
 print("=" * 50)
 print(f"CASE 1: Display session info on LCD")
-print(f"  Expected LCD line 1: 'Session:1min'")
+print(f"  Expected LCD line 1: 'Session:{SESSION_MINUTES}min'")
 print(f"  Expected LCD line 2: 'Starting soon...'")
 print("=" * 50)
 
