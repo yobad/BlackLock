@@ -52,7 +52,7 @@ LIN_ENA = PWM(Pin(11)) # PWM pin for speed control of the linear actuator
 #0x27 is the common I2C address for our LCD, if different we can change it here
 I2C_ADDR   = 0x27
 I2C_NUM_ROWS, I2C_NUM_COLS = 2, 16
-i2c = I2C(0, sda=Pin(0), scl=Pin(1), freq=400_000)
+i2c = I2C(0, sda=Pin(0), scl=Pin(1), freq=10000)
 lcd = I2cLcd(i2c, I2C_ADDR, I2C_NUM_ROWS, I2C_NUM_COLS)
 
 #------------------------------------------------------------------------------------------------------------------
