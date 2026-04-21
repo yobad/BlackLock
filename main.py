@@ -7,9 +7,7 @@ Author: The BlackLock Team
 This file was generated using Claude.ai, we put our own code (html website, speaker, internet and motor files) as 
 reference so that the AI could put them all together
 Here's a link to the discussion: https://claude.ai/share/9485b631-bc30-4606-8e16-da5940993260
- 
 
-  - Shared `state` dict is the single source of truth for all tasks
 """
  
 #Library imported
