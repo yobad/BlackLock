@@ -32,19 +32,15 @@ SSID      = "BlackLock"
 PASSWORD  = "BlackLock2"
  
 # This is the Load cell pin setup fo the weight sensor (adjustable based on our wiring)
-DATA_PIN  = Pin(5, Pin.IN, pull=Pin.PULL_DOWN)
-CLOCK_PIN = Pin(6, Pin.OUT) # sends clock signal to HX711 to trigger readings
+DATA_PIN  = Pin(6, Pin.IN, pull=Pin.PULL_DOWN)
+CLOCK_PIN = Pin(5, Pin.OUT) # sends clock signal to HX711 to trigger readings
 SCALE_F   = 1138.6597 #value to convert raw HX711 readings to grams — tweak after calibration
 THRESHOLD = 170          # grams — adjust based on your phone's weight + box setup
  
 # Stepper motor
 STEP_IN1, STEP_IN2, STEP_IN3, STEP_IN4 = 14, 12, 13, 15 # stepper motor pins (adjust to match wiring)
-STEPS_TO_CLOSE = 1028 # number of steps to fully close the box — adjust based on stepper motor and gearing
+STEPS_TO_CLOSE = 1700 # number of steps to fully close the box — adjust based on stepper motor and gearing
  
-# Linear actuator pin setup (adjust based on our wiring)
-LIN_IN1 = Pin(21, Pin.OUT)
-LIN_IN2 = Pin(10, Pin.OUT)
-LIN_ENA = PWM(Pin(11)) # PWM pin for speed control of the linear actuator
  
 # LCD pin setup (adjust if using different pins)
 #0x27 is the common I2C address for our LCD, if different we can change it here
@@ -77,8 +73,6 @@ hx711.tare()
 hx711.set_scale(SCALE_F)
 #STEPPER MOTOR SETUP
 stepper = motor.FullStepMotor.frompins(STEP_IN1, STEP_IN2, STEP_IN3, STEP_IN4)
-#LINEAR ACTUATOR SETUP
-lin_act = DCMotor(LIN_IN1, LIN_IN2, LIN_ENA)
 #----------------------------------------------------------------------------------------------------------------------
 # This code is to setup the hotspot (access point (ap)) for the pico
 def create_ap(ssid, password):
@@ -208,6 +202,8 @@ async def process_requests(reader, writer):
                 state["schedule_info"] = schedule_info
                 state["message"] = message
                 print("Schedule set:", st, dur)
+                # Update LCD when schedule is received from website
+                lcd_show(f"Start: {st}", f"Duration: {dur} min")
             else:
                 message = "Invalid input. Please enter a valid time and duration."
  
@@ -304,16 +300,11 @@ def play_alarm():
 def close_box():
     print("Closing box...")
     stepper.step(STEPS_TO_CLOSE) # Step the motor to close the box, adjust STEPS_TO_CLOSE in config based on your specific motor and gearing
-    lin_act.forward(100) # Extend the linear actuator to lock the box, modify value if it's too fast or slow
-    time.sleep(2)
-    lin_act.stop()
+   
 
 #This code is for opening the box mechanism using the stepper motor and linear actuator.
 def open_box():
     print("Opening box...")
-    lin_act.backwards(100) # Retract the linear actuator to unlock the box, modify value if it's too fast or slow
-    time.sleep(2)
-    lin_act.stop()
     stepper.step(-STEPS_TO_CLOSE) # Step the motor in reverse to open the box, adjust STEPS_TO_CLOSE in config based on your specific motor and gearing
 
 #------------------------------------------------------------------------------------------------------------------------
@@ -372,10 +363,13 @@ async def weight_and_session_task():
                     state["session_active"] = True
                     state["phone_in_box"]   = False
                     state["emergency_unlock"] = False
- 
+
                     # ── 2. Play alarm until phone detected ────────────────
                     print("Playing alarm – put your phone in the box!")
                     lcd_show("PUT PHONE IN BOX", "")
+                    # Start playing alarm BEFORE waiting for phone
+                    if sd_ok:
+                        play_alarm()
                     while not state["phone_in_box"]:
                         # Check weight
                         try:
