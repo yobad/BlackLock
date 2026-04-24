@@ -1,8 +1,8 @@
 """
 Description: This is the main file running the BlackLock. It includes:
 wifi hotspot created by Pico, async weight sensor monitoring, async web server,
-LCD display updates, and speaker playback.
-Date: Apr 14, 2026
+LCD display updates, and speaker.
+Date: Apr 23, 2026
 Author: The BlackLock Team 
 This file was generated using Claude.ai, we put our own code (html website, speaker, internet and motor files) as 
 reference so that the AI could put them all together
