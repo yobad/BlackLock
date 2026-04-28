@@ -35,7 +35,7 @@ PASSWORD  = "BlackLock2"
 DATA_PIN  = Pin(6, Pin.IN, pull=Pin.PULL_DOWN)
 CLOCK_PIN = Pin(5, Pin.OUT) # sends clock signal to HX711 to trigger readings
 SCALE_F   = 1138.6597 #value to convert raw HX711 readings to grams — tweak after calibration
-THRESHOLD = 100         # grams — adjust based on your phone's weight + box setup
+THRESHOLD = 150         # grams — adjust based on your phone's weight + box setup
 DEFAULT_DURATION = 1   # minutes — used when the phone is placed on the sensor
                          # without a duration having been set via the website.
 GRACE_SECONDS    = 30   # seconds — after a session ends the box stays open for
@@ -57,7 +57,8 @@ LCD_REFRESH_SEC  = 2     # how often the LCD is redrawn during the countdown
                          # cleared-and-rewritten every N seconds to reduce the
                          # visible flicker caused by lcd.clear(). Raise this if
                          # flicker is still annoying; 1 = update every second.
- 
+EMERGENCY_BTN_PIN = Pin(10)
+button = Pin(EMERGENCY_BTN_PIN, Pin.IN)
 # Stepper motor
 STEP_IN1, STEP_IN2, STEP_IN3, STEP_IN4 = 14, 12, 13, 15 # stepper motor pins (adjust to match wiring)
 STEPS_TO_CLOSE = 1700 # number of steps to fully close the box — adjust based on stepper motor and gearing
@@ -310,11 +311,14 @@ async def process_requests(reader, writer):
                 message = "Emergency unlock triggered!"
                 state["message"] = message
                 print("EMERGENCY UNLOCK requested via web")
-            elif cmd == "LOCK":
-                # Manual "phone placed" confirmation from web (optional), pretty useless but why not.
-                message = "Manual lock command received."
             else:
                 message = f"Unknown command: {cmd}"
+
+        elif button.value == 1:
+                state["emergency_unlock"] = True
+                message = "Emergency unlock triggered!"
+                state["message"] = message
+                print("EMERGENCY UNLOCK requested physical button")
  
         #This code block is for handling the root route ("/"), which serves the main page of the web interface.
         # It simply prepares the current message and schedule info from the state to be displayed on the web page.
@@ -502,6 +506,8 @@ async def weight_and_session_task():
         if loop_counter % 10 == 0 and state["start_time"]:
             print(f"[idle] Pico clock={current_hhmm()}  waiting for={state['start_time']}  duration={state['duration']}")
 
+
+    
         # ── 1. Decide whether to start a session ────────────────────────
         # A session can start two ways — either is enough as long as
         # `duration` has been set via the website:
@@ -741,6 +747,20 @@ async def weight_and_session_task():
         # Poll once a second so a phone placed on the sensor triggers
         # a session within ~1 s (was 5 s — too slow to feel responsive).
         await asyncio.sleep(1)
+
+
+
+async def emergency_button_task():
+    while True:
+        if button.value() == 1:
+            state["emergency_unlock"] = True
+            message = "Emergency unlock triggered!"
+            state["message"] = message
+            print("EMERGENCY UNLOCK requested physical button")
+            # Wait for release before re-arming so one press = one event
+            while button.value() == 1:
+                await asyncio.sleep(0.02)
+        await asyncio.sleep(0.02)
  
 # the main function to start the access point, launch the web server,
 # and run all tasks concurrently
@@ -760,6 +780,7 @@ async def main():
     await asyncio.gather(
         lcd_task(),
         weight_and_session_task(),
+        emergency_button_task(),
     )
     # `server` runs in the background automatically once awaited above
  
