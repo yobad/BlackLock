@@ -15,6 +15,7 @@ import asyncio # For async programming (web server and weight monitoring run con
 import network
 import time
 from machine import Pin, PWM, I2C
+import random
 #Pin= controls GPIO pin
 #PWM = controls pulse width modulation for motor speed and speaker
 #I2C = for LCD communication
@@ -30,6 +31,8 @@ import os, sdcard, vfs #for sd file management, used for speaker audio files
 # Configuration (could be moved to a separate config file, for safety of passwords))
 SSID      = "BlackLock"
 PASSWORD  = "BlackLock2"
+
+WavFiles = ["/sd/motivation2.wav", "/sd/Sneaky.wav", "/sd/EvaSong2.wav"]   # List of motivational WAV files on the SD card
  
 # This is the Load cell pin setup fo the weight sensor (adjustable based on our wiring)
 DATA_PIN  = Pin(6, Pin.IN, pull=Pin.PULL_DOWN)
@@ -388,14 +391,16 @@ def mount_sd():
 #     the phone being placed well within the 2-second spec.
 #
 # Returns True if stopped early, False if the file played to the end.
-def play_alarm(stop_fn):
+def play_alarm(stop_fn, wavfile=None):
     pin = machine.PWM(machine.Pin(22))
     pin.freq(20000)
     stopped_early = False
-    CHECK_EVERY_N_CHUNKS = 40   # at sr=8 kHz this is a stop-check every ~500 ms
+    CHECK_EVERY_N_CHUNKS = 100   # at sr=8 kHz this is a stop-check every ~500 ms
     try:
-        with open("/sd/motivation2.wav", "rb") as f:
-            hdr = f.read(44)
+        if wavfile is None:
+            wavfile = random.choice(WavFiles) #type: ignore
+        with open(wavfile, "rb") as f: #type: ignore
+            hdr = f.read(100)
             # Stricter header check (from speaker2.py): require both
             # "RIFF" and "WAVE" markers before trusting the file.
             if len(hdr) < 44 or hdr[0:4] != b"RIFF" or hdr[8:12] != b"WAVE":
