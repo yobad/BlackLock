@@ -662,7 +662,8 @@ async def weight_and_session_task():
                         # happening while the stepper is running.
                         lcd_show("Box is opening", "Take your phone")
                     open_box()
-
+                    lcd_show("DO NOT GIVE UP!!!")
+                    play_alarm(lambda: False, "/sd/motivation2.wav" )  # play a full alarm as the box opens, no early stop
                     # Clear the emergency flag now that we've acted on it.
                     # Previously emergency unlock skipped the grace period
                     # entirely and dumped straight to idle, which gave the
