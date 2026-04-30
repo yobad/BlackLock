@@ -32,7 +32,7 @@ import os, sdcard, vfs #for sd file management, used for speaker audio files
 SSID      = "BlackLock"
 PASSWORD  = "BlackLock2"
 
-WavFiles = ["/sd/motivation2.wav", "/sd/Sneaky.wav", "/sd/EvaSong2.wav"]   # List of motivational WAV files on the SD card
+WavFiles = ["/sd/motivation2.wav", "/sd/Sneaky.wav", "/sd/EvaSong2.wav", "/sd/Piggi.wav", "/sd/banana2.wav", "/sd/RickRoll.wav", "/sd/Barbie.wav", "/sd/Way.wav", "/sd/Times.wav","/sd/amongus.wav","/sd/Piggi.wav"]   # List of motivational WAV files on the SD card
  
 # This is the Load cell pin setup fo the weight sensor (adjustable based on our wiring)
 DATA_PIN  = Pin(6, Pin.IN, pull=Pin.PULL_DOWN)
@@ -664,7 +664,7 @@ async def weight_and_session_task():
                     open_box()
                     if state["emergency_unlock"]:
                         lcd_show("DO NOT GIVE UP!!!")
-                        play_alarm(lambda: False, "/sd/motivation2.wav" )  # play a full alarm as the box opens, no early stop
+                        play_alarm(lambda: False, "/sd/Piggi.wav" )  # play a full alarm as the box opens, no early stop
                     # Clear the emergency flag now that we've acted on it.
                     # Previously emergency unlock skipped the grace period
                     # entirely and dumped straight to idle, which gave the
