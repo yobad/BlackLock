@@ -1,41 +1,270 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <meta charset="UTF-8">
-<title>BlackLock Phone Lock</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackLock</title>
 
 <style>
-body {
-    background: black;
-    color: #00ffcc;
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: #0a1119;
+    color: #a4c8e0;
     font-family: monospace;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px 16px 48px 16px;
+}
+
+.container {
+    width: 100%;
+    max-width: 720px;
+}
+
+/* === Hero header — clock dominates, title is a label === */
+.hero {
     text-align: center;
-    margin-top: 60px;
+    margin-bottom: 28px;
+    padding: 8px 0 0 0;
+}
+
+h1 {
+    font-size: clamp(26px, 7vw, 40px);
+    font-weight: 600;
+    letter-spacing: 0.4em;
+    text-indent: 0.4em;
+    margin: 0 0 22px 0;
+    color: #d6e8f5;
+    text-transform: uppercase;
 }
 
 #clock {
-    font-size: 70px;
+    font-size: clamp(48px, 14vw, 76px);
+    line-height: 1;
+    color: #d6e8f5;
+    font-weight: normal;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
 }
 
-button {
-    padding: 12px 20px;
-    margin: 10px;
-    font-size: 16px;
+#clock .ampm {
+    font-size: 0.4em;
+    color: #d6e8f5;
+    margin-left: 0.4em;
+    letter-spacing: 0.15em;
+    vertical-align: 0.45em;   /* sits a bit higher, like a superscript */
+}
+
+/* === Cards === */
+.card {
+    background: #131e2b;
+    border: 1px solid #1f2f42;
+    border-radius: 12px;
+    padding: 22px 22px 24px 22px;
+    margin-bottom: 18px;
+    /* Subtle elevation — feels like the panel sits slightly above the page */
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset,
+                0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.card-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: #6f93b0;
+    font-weight: normal;
+}
+
+/* Small dot in the card header for visual anchor */
+.card-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #2e4a64;
+    margin-right: 10px;
+    display: inline-block;
+    vertical-align: middle;
+    transform: translateY(-1px);
+}
+
+.card-dot.live {
+    background: #6ba3d0;
+    box-shadow: 0 0 8px rgba(107, 163, 208, 0.5);
+}
+
+/* === Form fields === */
+.row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.field {
+    flex: 1;
+    min-width: 130px;
+}
+
+.field-label {
+    display: block;
+    font-size: 12px;
+    color: #6f93b0;
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
 }
 
 input {
-    padding: 8px;
-    font-size: 18px;
-}
-
-#status {
-    margin-top: 20px;
-    font-size: 18px;
-}
-
-#savedSchedule {
-    margin-top: 10px;
+    width: 100%;
+    padding: 11px 13px;
     font-size: 16px;
+    background: #0e1620;
+    color: #e3eef8;
+    border: 1px solid #243a52;
+    border-radius: 8px;
+    font-family: monospace;
+    outline: none;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+input:focus {
+    border-color: #6ba3d0;
+    background: #11192a;
+}
+
+/* Hide spinner arrows on number inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* === Buttons === */
+button {
+    padding: 12px 18px;
+    font-size: 13px;
+    font-family: monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    background: #1c2937;
+    color: #d6e8f5;
+    border: 1px solid #2e4a64;
+    border-radius: 8px;
+    cursor: pointer;
+    min-height: 44px;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+button:hover {
+    background: #243648;
+    border-color: #6ba3d0;
+}
+
+button:active {
+    background: #2c4256;
+}
+
+button.primary {
+    background: #1f3a5c;
+    border-color: #2e5688;
+    color: #e6f0fa;
+}
+
+button.primary:hover {
+    background: #264772;
+    border-color: #6ba3d0;
+}
+
+button.danger {
+    color: #d4998a;
+    border-color: #4a3633;
+    background: #1f1614;
+}
+
+button.danger:hover {
+    background: #2a1d1a;
+    border-color: #b06f5e;
+}
+
+.button-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.button-row button {
+    flex: 1 1 200px;
+}
+
+.inline-control {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+}
+
+.inline-control input {
+    flex: 1;
+}
+
+.inline-control button {
+    flex: 0 0 auto;
+}
+
+/* === Status card — quieter, prompt-style entries === */
+.status-line {
+    font-size: 13px;
+    color: #8eb4d2;
+    margin: 6px 0;
+    word-wrap: break-word;
+    min-height: 1.2em;
+}
+
+.status-line .key {
+    color: #4a6f8e;
+    margin-right: 10px;
+    user-select: none;
+}
+
+.empty {
+    color: #4a6f8e;
+    font-style: italic;
+}
+
+/* === Desktop adjustments === */
+@media (min-width: 720px) {
+    body {
+        padding: 56px 40px;
+    }
+    .container {
+        max-width: 580px;
+    }
+}
+
+/* === Narrow phones: stack action buttons full-width === */
+@media (max-width: 480px) {
+    .button-row button {
+        flex: 1 1 100%;
+    }
 }
 </style>
 
@@ -43,25 +272,52 @@ input {
 
 <body>
 
-<h1>BlackLock</h1>
+<div class="container">
 
-<div id="clock">00:00:00 AM</div>
+    <div class="hero">
+        <h1>BlackLock</h1>
+        <div id="clock">00:00:00<span class="ampm">AM</span></div>
+    </div>
 
-<br><br>
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title"><span class="card-dot"></span>Schedule</div>
+        </div>
+        <div class="row">
+            <div class="field">
+                <label class="field-label" for="startTime">Start time</label>
+                <input type="time" id="startTime" name="start_time" value="{{START_TIME}}">
+            </div>
+            <div class="field">
+                <label class="field-label" for="duration">Duration (min)</label>
+                <input type="number" id="duration" name="duration" min="1" value="{{DURATION}}">
+            </div>
+        </div>
+        <div class="button-row">
+            <button class="primary" onclick="saveSchedule()">Save schedule</button>
+            <button class="danger" onclick="sendLockCommand('EMERGENCY_UNLOCK')">Emergency unlock</button>
+        </div>
+    </div>
 
-<h3>Set Start Time</h3>
-<input type="time" id="startTime" name="start_time" value="{{START_TIME}}">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title"><span class="card-dot"></span>Default session length</div>
+        </div>
+        <div class="inline-control">
+            <input type="number" id="defaultDuration" min="1" max="240" value="{{DEFAULT_DURATION}}">
+            <button onclick="applyDefault()">Apply</button>
+        </div>
+    </div>
 
-<h3>Lock Duration (minutes)</h3>
-<input type="number" id="duration" name="duration" min="1" value="{{DURATION}}">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title"><span class="card-dot live"></span>Status</div>
+        </div>
+        <p class="status-line"><span class="key">›</span><span id="status">{{MESSAGE}}</span></p>
+        <p class="status-line"><span class="key">›</span><span id="savedSchedule">{{SCHEDULE_INFO}}</span></p>
+    </div>
 
-<br><br>
-
-<button onclick="saveSchedule()">Save Schedule</button>
-<button onclick="sendLockCommand('EMERGENCY_UNLOCK')">Emergency Unlock</button>
-
-<p id="status">{{MESSAGE}}</p>
-<p id="savedSchedule">{{SCHEDULE_INFO}}</p>
+</div>
 
 <script>
 function updateClock() {
@@ -73,10 +329,11 @@ function updateClock() {
     hours = hours % 12;
     if (hours === 0) hours = 12;
     hours = String(hours).padStart(2, '0');
-    document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds} ${period}`;
+    document.getElementById('clock').innerHTML = `${hours}:${minutes}:${seconds}<span class="ampm">${period}</span>`;
 }
 
 setInterval(updateClock, 1000);
+updateClock();
 
 function saveSchedule() {
     const startTime = document.getElementById('startTime').value;
@@ -109,6 +366,25 @@ function sendLockCommand(cmd) {
         })
         .catch(error => {
             document.getElementById('status').textContent = 'Failed to send command.';
+            console.log(error);
+        });
+}
+
+function applyDefault() {
+    const def = document.getElementById('defaultDuration').value;
+    if (!def || def < 1) {
+        document.getElementById('status').textContent = 'Please enter a valid default duration.';
+        return;
+    }
+    fetch(`/set?default_duration=${encodeURIComponent(def)}`)
+        .then(response => response.text())
+        .then(html => {
+            document.open();
+            document.write(html);
+            document.close();
+        })
+        .catch(error => {
+            document.getElementById('status').textContent = 'Failed to apply default.';
             console.log(error);
         });
 }
