@@ -95,7 +95,13 @@ state = {
                                    # the phone is placed back in the box.
                                    # Cleared once consumed or once a session
                                    # completes normally.
+    "default_duration": None,      # Default session length in minutes used
+                                   # when the phone is placed without a
+                                   # duration set on the website. Initialized
+                                   # to DEFAULT_DURATION below; can be changed
+                                   # at runtime via the /set route.
 }
+state["default_duration"] = DEFAULT_DURATION   # boot value, overrideable via web
 #----------------------------------------------------------------------------------------------------------------------
 #The purpose of these line of code of to set up the hardware (stepper motor, linear actuator and load cell)
 #LOAD CELL SETUP
@@ -138,6 +144,7 @@ def render_page(message="", schedule_info=""):
     html = html.replace("{{DURATION}}",      dur)
     html = html.replace("{{MESSAGE}}",       message)
     html = html.replace("{{SCHEDULE_INFO}}", schedule_info)
+    html = html.replace("{{DEFAULT_DURATION}}", str(state["default_duration"]))
 
     # Inject a tiny time-sync script. It runs once on page load and then
     # every 10 seconds while the page stays open, so the Pico's RTC keeps
@@ -272,6 +279,17 @@ async def process_requests(reader, writer):
                 except Exception as e:
                     print("RTC set error:", e)
 
+            # Optional default-duration override from the website. Sent
+            # as a separate form field so it can be saved without also
+            # having to schedule a session. Add this to your index.html:
+            #   <label>Default session length (min):
+            #     <input name="default_duration" type="number" min="1" max="240">
+            #   </label>
+            default_dur = params.get("default_duration", "").strip()
+            if default_dur and default_dur.isdigit() and int(default_dur) > 0:
+                state["default_duration"] = int(default_dur)
+                print(f"Default duration updated → {state['default_duration']} min")
+
             if st and dur and dur.isdigit() and int(dur) > 0:
                 state["start_time"] = st
                 state["duration"]   = int(dur)
@@ -280,12 +298,14 @@ async def process_requests(reader, writer):
                 state["schedule_info"] = schedule_info
                 state["message"] = message
                 print("Schedule set:", st, dur)
-                # Note: don't call lcd_show here — lcd_task is the single owner
-                # of the LCD and will pick up the new schedule on its next tick
-                # (within 2 s). This avoids the flicker where lcd_task overwrites
-                # the schedule line back to SSID/PW two seconds after /set.
-            else:
+            elif st or dur:
+                # User filled in one schedule field but not the other → real error.
                 message = "Invalid input. Please enter a valid time and duration."
+            elif default_dur:
+                # Only default_duration was submitted (Apply button) — confirm it.
+                message = f"Default session length set to {state['default_duration']} min."
+                state["message"] = message
+            # else: empty /set request → leave message blank
  
         #This code block handles /settime?hhmm=HH:MM — the page injects a
         # tiny bit of JavaScript that calls this route automatically on load,
@@ -478,7 +498,7 @@ async def lcd_task():
             # hasn't started yet → show the schedule. This is what makes the
             # LCD react to the dictionary being updated by /set.
             lcd_show(f"Start: {state['start_time']}",
-                     f"Duration: {state['duration']} min")
+                     f"Dur: {state['duration']} min")
         else:
             # Idle: alternate between SSID/PW and SSID/IP every 2 seconds
             if display_ip:
@@ -548,8 +568,16 @@ async def weight_and_session_task():
                 # (has_schedule requires it), so this only fires for pure
                 # weight-triggered sessions.
                 if not state["duration"]:
-                    state["duration"] = DEFAULT_DURATION
-                    print(f"No duration set — defaulting to {DEFAULT_DURATION} min")
+                    if state["paused_remaining_sec"]:
+                        # Resume from where the previous session was emergency-unlocked.
+                        state["duration"] = max(1, (state["paused_remaining_sec"] + 59) // 60)
+                        # Don't consume paused_remaining_sec here — the inner
+                        # loop's "Pick the countdown length" block does that
+                        # so the seconds-precision is preserved.
+                        print(f"Resuming previous session — {state['duration']} min remaining")
+                    else:
+                        state["duration"] = state["default_duration"]
+                        print(f"No duration set — defaulting to {state['default_duration']} min")
 
                 print(f"Starting session  (time={time_trigger}, weight={weight_trigger})")
                 state["session_active"]   = True
@@ -687,11 +715,11 @@ async def weight_and_session_task():
                         # Emergency alarm: play for AT LEAST 20 s, looping
                         # random WAVs. After the 20 s minimum, stop as soon
                         # as the phone is placed back on the load cell.
-                        # Hard cap at 5 min so it doesn't run forever if
-                        # the user walks away.
+                        # Hard cap at 60 s to protect the speaker from
+                        # overheating during long playback sessions.
                         lcd_show("DO NOT GIVE UP", "Put phone back!")
-                        EMERGENCY_MIN_MS = 20000
-                        EMERGENCY_MAX_MS = 60000
+                        EMERGENCY_MIN_MS = 20_000
+                        EMERGENCY_MAX_MS = 60_000   # 1 min cap — speaker overheats beyond this
                         emerg_start = utime.ticks_ms()
                         phone_back = False
 
@@ -714,6 +742,17 @@ async def weight_and_session_task():
                         if sd_ok:
                             while not emergency_stop_fn():
                                 play_alarm(emergency_stop_fn)
+                                # Explicit silence between WAV iterations.
+                                # play_alarm's finally block already deinits
+                                # the PWM, but rapid recreation can leave a
+                                # residual duty on the speaker. Re-grab the
+                                # pin briefly, force duty to 0, then release.
+                                try:
+                                    quiet = machine.PWM(machine.Pin(22))
+                                    quiet.duty_u16(0)
+                                    quiet.deinit()
+                                except Exception:
+                                    pass
                                 await asyncio.sleep(0)
                         else:
                             # No SD card — just wait the minimum then poll
@@ -733,10 +772,24 @@ async def weight_and_session_task():
                             close_box()
                             continue   # restart inner loop, picks up paused_remaining_sec
 
-                        # Otherwise (timed out, no phone) → fall through
-                        # to grace period so user can take phone out cleanly.
-                        # Clear the saved time since we're abandoning resume.
+                        # Otherwise — alarm timed out without phone return.
+                        # Check the load cell once more: if the phone is
+                        # actually GONE (user took it out during the alarm),
+                        # end the session immediately instead of going into
+                        # the grace period and re-locking. Without this
+                        # check the box would re-close after 1 min even
+                        # though the user already removed the phone.
+                        try:
+                            final_w = hx711.get_units()
+                        except Exception:
+                            final_w = THRESHOLD   # assume phone still there on error
                         state["paused_remaining_sec"] = None
+                        if final_w < THRESHOLD:
+                            print(f"Phone removed during alarm ({final_w:.1f} g) — ending session")
+                            lcd_show("Session ended", "Phone removed")
+                            phone_removed = True
+                            await asyncio.sleep(2)
+                            break   # exit inner countdown/grace loop → idle reset
 
                     # Clear the emergency flag now that we've acted on it.
                     # Previously emergency unlock skipped the grace period
@@ -806,12 +859,12 @@ async def weight_and_session_task():
                         break   # exit the outer re-lock loop
 
                     # Phone still there → re-lock for another round
-                    print(f"Phone not removed — re-locking for {DEFAULT_DURATION} min")
+                    print(f"Phone not removed — re-locking for {state['default_duration']} min")
                     lcd_show("Phone still in", "Re-locking...")
                     await asyncio.sleep(2)   # let user read the message
                     close_box()
-                    total_sec = DEFAULT_DURATION * 60
-                    state["duration"] = DEFAULT_DURATION
+                    total_sec = state["default_duration"] * 60
+                    state["duration"] = state["default_duration"]
                     # loop back to the countdown with fresh total_sec
 
                 # ── 5. Reset state back to idle ───────────────────────
