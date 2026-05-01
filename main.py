@@ -89,6 +89,12 @@ state = {
     "message":   "",          # Status message shown on the web page
     "schedule_info": "",      # Confirmation of the current schedule is shown on the web page
     "ip": None,               # IP address of the access point
+    "paused_remaining_sec": None,  # When emergency unlock fires mid-countdown,
+                                   # the seconds left are stored here so the
+                                   # session can resume from this point when
+                                   # the phone is placed back in the box.
+                                   # Cleared once consumed or once a session
+                                   # completes normally.
 }
 #----------------------------------------------------------------------------------------------------------------------
 #The purpose of these line of code of to set up the hardware (stepper motor, linear actuator and load cell)
@@ -472,7 +478,7 @@ async def lcd_task():
             # hasn't started yet → show the schedule. This is what makes the
             # LCD react to the dictionary being updated by /set.
             lcd_show(f"Start: {state['start_time']}",
-                     f"Dur: {state['duration']} min")
+                     f"Duration: {state['duration']} min")
         else:
             # Idle: alternate between SSID/PW and SSID/IP every 2 seconds
             if display_ip:
@@ -604,10 +610,20 @@ async def weight_and_session_task():
                 # phase if the user leaves their phone in the box past
                 # the grace period — in that case we close again for
                 # another DEFAULT_DURATION session.
-                total_sec = state["duration"] * 60
                 phone_removed = False
 
                 while True:
+                    # Pick the countdown length: resume from a paused
+                    # session if one exists, otherwise use the configured
+                    # duration. paused_remaining_sec is set when emergency
+                    # unlock fires mid-countdown and consumed here.
+                    if state["paused_remaining_sec"]:
+                        total_sec = state["paused_remaining_sec"]
+                        state["paused_remaining_sec"] = None
+                        print(f"Resuming paused session — {total_sec}s left")
+                    else:
+                        total_sec = state["duration"] * 60
+
                     # ── Countdown ─────────────────────────────────
                     # Counter-based instead of timestamp-based so every
                     # value from total_sec down to 00:00 actually gets
@@ -630,6 +646,11 @@ async def weight_and_session_task():
                     for frame in range(total_sec):
                         remaining_sec = total_sec - frame
                         if state["emergency_unlock"]:
+                            # Save remaining time so the next session
+                            # (when phone is placed back) resumes from
+                            # here instead of starting fresh.
+                            state["paused_remaining_sec"] = remaining_sec
+                            print(f"Emergency unlock — {remaining_sec}s saved for resume")
                             aborted = True
                             break
                         # Only redraw the LCD every LCD_REFRESH_SEC frames
@@ -662,9 +683,61 @@ async def weight_and_session_task():
                         # happening while the stepper is running.
                         lcd_show("Box is opening", "Take your phone")
                     open_box()
-                    if state["emergency_unlock"]:
-                        lcd_show("DO NOT GIVE UP!!!")
-                        play_alarm(lambda: False, "/sd/Piggi.wav" )  # play a full alarm as the box opens, no early stop
+                    if aborted:
+                        # Emergency alarm: play for AT LEAST 20 s, looping
+                        # random WAVs. After the 20 s minimum, stop as soon
+                        # as the phone is placed back on the load cell.
+                        # Hard cap at 5 min so it doesn't run forever if
+                        # the user walks away.
+                        lcd_show("DO NOT GIVE UP", "Put phone back!")
+                        EMERGENCY_MIN_MS = 20000
+                        EMERGENCY_MAX_MS = 60000
+                        emerg_start = utime.ticks_ms()
+                        phone_back = False
+
+                        def emergency_stop_fn():
+                            nonlocal phone_back
+                            elapsed = utime.ticks_diff(utime.ticks_ms(), emerg_start)
+                            if elapsed >= EMERGENCY_MAX_MS:
+                                return True
+                            if elapsed < EMERGENCY_MIN_MS:
+                                return False
+                            # Past the 20 s minimum — check the load cell.
+                            try:
+                                if hx711.get_units() >= THRESHOLD:
+                                    phone_back = True
+                                    return True
+                            except Exception:
+                                pass
+                            return False
+
+                        if sd_ok:
+                            while not emergency_stop_fn():
+                                play_alarm(emergency_stop_fn)
+                                await asyncio.sleep(0)
+                        else:
+                            # No SD card — just wait the minimum then poll
+                            # for the phone manually.
+                            await asyncio.sleep(EMERGENCY_MIN_MS / 1000)
+                            while not emergency_stop_fn():
+                                await asyncio.sleep(0.2)
+
+                        state["emergency_unlock"] = False
+
+                        # If the phone is back AND we have saved time,
+                        # re-close the box and resume the countdown from
+                        # where it paused. Skip the grace period entirely.
+                        if phone_back and state["paused_remaining_sec"]:
+                            print("Phone is back — re-closing and resuming countdown")
+                            lcd_show("Resuming session", "Box closing...")
+                            close_box()
+                            continue   # restart inner loop, picks up paused_remaining_sec
+
+                        # Otherwise (timed out, no phone) → fall through
+                        # to grace period so user can take phone out cleanly.
+                        # Clear the saved time since we're abandoning resume.
+                        state["paused_remaining_sec"] = None
+
                     # Clear the emergency flag now that we've acted on it.
                     # Previously emergency unlock skipped the grace period
                     # entirely and dumped straight to idle, which gave the
@@ -749,6 +822,7 @@ async def weight_and_session_task():
                 state["duration"]         = None
                 state["message"]          = "Session complete! Great work."
                 state["schedule_info"]    = ""
+                state["paused_remaining_sec"] = None   # clean finish, no resume
                 print("Session complete.")
 
         # Poll once a second so a phone placed on the sensor triggers
