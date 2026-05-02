@@ -114,13 +114,16 @@ h1 {
 .row {
     display: flex;
     gap: 14px;
-    flex-wrap: wrap;
+    /* No wrap — keep Start time and Duration side-by-side at equal widths
+       on every screen size. Combined with flex:1 1 0 below, both fields
+       split the row 50/50 regardless of their internal content. */
+    flex-wrap: nowrap;
     margin-bottom: 18px;
 }
 
 .field {
-    flex: 1;
-    min-width: 130px;
+    flex: 1 1 0;
+    min-width: 0;        /* allow shrinking below content's intrinsic width */
 }
 
 .field-label {
@@ -133,6 +136,8 @@ h1 {
 
 input {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;        /* allow flex children to shrink below intrinsic size */
     padding: 11px 13px;
     font-size: 16px;
     background: #0e1620;
@@ -149,6 +154,17 @@ input:focus {
     background: #11192a;
 }
 
+/* iOS Safari renders <input type="time"> with its own intrinsic width
+   (wide enough for the native time picker chrome) which overrides
+   width:100% and pushes the field past its parent. Stripping the
+   webkit appearance makes it render like a normal text input. The
+   native time picker still pops up on tap — only the rendering changes. */
+input[type="time"] {
+    -webkit-appearance: none;
+    appearance: none;
+    text-align: left;
+}
+
 /* Hide spinner arrows on number inputs */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
@@ -157,6 +173,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 input[type="number"] {
     -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 /* === Buttons === */
