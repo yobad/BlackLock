@@ -53,7 +53,7 @@ GRACE_DEBOUNCE   = 3     # require this many consecutive below-threshold reading
                          # threshold even when the phone is still sitting there.
 GRACE_SETTLE_SEC = 1     # seconds to wait after open_box() before starting to
                          # poll the load cell, so mechanical vibration dies out.
-LCD_REFRESH_SEC  = 2     # how often the LCD is redrawn during the countdown
+LCD_REFRESH_SEC  = 3     # how often the LCD is redrawn during the countdown
                          # and grace period. The underlying timing loop still
                          # runs every 1 s (for tick-accurate timekeeping and
                          # emergency-unlock checks), but the screen is only
@@ -475,7 +475,7 @@ def open_box():
 def current_hhmm():
     t = time.localtime() # get local time by calling time.localtime(), which returns a tuple with the current time and date information, and then formats it into a string showing just the hours and minutes.
     #time.localtime() gets the real time from the Pico's internal clock
-    return f"{t[3]:02d}:{t[4]:02d}"
+    return f"{t[3]:02d}:{t[4]:02d}" #
  
 def current_hhmmss():
     t = time.localtime()
@@ -688,7 +688,7 @@ async def weight_and_session_task():
                         # lcd.clear()+putstr is throttled to cut flicker.
                         if frame % LCD_REFRESH_SEC == 0:
                             mins, secs = divmod(remaining_sec, 60)
-                            lcd_show(current_hhmmss(),
+                            lcd_show(f"Current: {current_hhmm()}",
                                      f"Left: {mins:02d}:{secs:02d}")
                         target = time.ticks_add(countdown_start,
                                                 (frame + 1) * 1000)
