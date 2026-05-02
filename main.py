@@ -699,7 +699,8 @@ async def weight_and_session_task():
                     # Show 00:00 for a beat so the user actually sees
                     # the countdown finish before anything else happens.
                     if not aborted:
-                        lcd_show(current_hhmmss(), "Left: 00:00")
+                        lcd_show(f"Current: {current_hhmm()}",
+                                     f"Left: {mins:02d}:{secs:02d}")
                         await asyncio.sleep(1)
 
                     # ── Open box ──────────────────────────────────
