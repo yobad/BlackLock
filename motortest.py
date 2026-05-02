@@ -31,7 +31,7 @@ from dcmotor import DCMotor
 
 # ── Config ────────────────────────────────────────────────────────────────────
 SCALE_F         = 1138.6597
-THRESHOLD       = -1 # grams — tweak after calibration
+THRESHOLD       = -100 # grams — tweak after calibration
 STEPS_TO_CLOSE  = 1700
 SESSION_SECONDS = 10    # keep short for testing
 
