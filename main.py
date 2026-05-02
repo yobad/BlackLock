@@ -498,7 +498,7 @@ async def lcd_task():
             # hasn't started yet → show the schedule. This is what makes the
             # LCD react to the dictionary being updated by /set.
             lcd_show(f"Start: {state['start_time']}",
-                     f"Dur: {state['duration']} min")
+                     f"Duration: {state['duration']} min")
         else:
             # Idle: alternate between SSID/PW and SSID/IP every 2 seconds
             if display_ip:
