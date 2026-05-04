@@ -1,4 +1,9 @@
 '''
+Author: Tyler Peppy
+Date: Last commit on Github was February 4, 2021 by user T-622
+Description: This library provides an API for controlling a character LCD display.
+This library can be found here:
+https://github.com/T-622/RPI-PICO-I2C-LCD
 MIT License
 
 Copyright (c) 2023 Tyler Peppy
