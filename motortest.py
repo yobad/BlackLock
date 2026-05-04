@@ -7,20 +7,9 @@ This file was generated using Claude.ai, we put our main code file (main.py) and
 created to design the tests as reference so that the AI could put them all together
 Here's a link to the discussion: https://claude.ai/share/153a9703-121d-4fb9-8fca-2f2ae00f5fe7
 ===========================================================
-Objective:
-  - Verify a phone placed on the load cell triggers the lid to close
-  - Verify the linear actuator locks the lid when closed
-  - Verify the lid unlocks and opens when the study session ends
-
-Test cases:
-  Case 1 — No phone placed → lid stays OPEN (5 readings, all below threshold)
-  Case 2 — Phone placed    → lid closes, locks, waits SESSION_SECONDS, unlocks, opens
-  Case 3 — After opening   → lid stays open even if phone not removed
-
-How to run:
-  1. Press on the run button at the bottom of VS Code
-  3. For Case 1: keep the load cell empty
-  4. For Case 2: place phone/weight when prompted
+This file was repurposed to open the lid if the phone gets stuck in the box. 
+Running the file should open the lid (threshold set to -100).
+60s to remove the phone and stop the test in VS Code before the lid opens again (threshold set to -100).
 """
 
 import time
@@ -31,9 +20,9 @@ from dcmotor import DCMotor
 
 # ── Config ────────────────────────────────────────────────────────────────────
 SCALE_F         = 1138.6597
-THRESHOLD       = -100 # grams — tweak after calibration
+THRESHOLD       = -100 # grams — Assure that lid opens
 STEPS_TO_CLOSE  = 1700
-SESSION_SECONDS = 10    # keep short for testing
+SESSION_SECONDS = 30   # Be sure to have time to remove the phone and press stop in VS Code
 
 # ── Hardware init ─────────────────────────────────────────────────────────────
 print("Taring load cell — remove all weight now...")
