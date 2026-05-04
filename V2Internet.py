@@ -1,9 +1,16 @@
 
 """
-BlackLock - Connection Test (No Hardware Modules)
-Tests WiFi hotspot + web server only.
-Upload this as main.py temporarily, along with your index.html.
-https://claude.ai/share/9485b631-bc30-4606-8e16-da5940993260
+Author: Jérôme Poupart
+Date: April 14, 2026
+Description: This file implements a simple Wi-Fi hotspot 
+and web server on the Raspberry Pi Pico W
+This file was in majority generated with claude.ai on April 14, 2026. Which using code files created by 
+Jérôme Poupart and Bo Yang Zhang as reference.
+https://claude.ai/share/153a9703-121d-4fb9-8fca-2f2ae00f5fe7
+
+The only purpose of this file is to create a Wi-Fi hotspot and web server on the Raspberry Pi Pico W
+Without too much hardware like stepper motor or speakers, great to run some connectivity tests.
+***THIS FILE IS NOT MEANT TO BE USED IN THE FINAL PRODUCT, IT'S JUST A PROOF OF CONCEPT FOR THE WIFI HOTSPOT AND WEB SERVER.***
 """
  
 import asyncio
