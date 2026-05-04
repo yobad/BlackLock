@@ -1,3 +1,12 @@
+"""
+Author: Jérôme Poupart
+Date: April 3, 2026
+Description: This file implements a simple audio player for the Raspberry Pi Pico that reads 8-bit
+Parts of this file were generated with Google Gemini on April 3, 2026.
+Conversation: https://gemini.google.com/share/da4623f59ffe
+"""
+
+
 import machine
 import utime
 import os
@@ -56,4 +65,4 @@ def play_wav_8bit(filename):
             audio_pin = None
 
 if mount_sd():
-    play_wav_8bit("/sd/motivation2.wav")
+    play_wav_8bit("/sd/Piggi.wav")
