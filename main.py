@@ -46,8 +46,7 @@ from machine import Pin, PWM, I2C    # GPIO, PWM speaker, I²C bus for LCD
 # ─── Project libraries ──────────────────────────────────────────────────────
 from pico_i2c_lcd import I2cLcd      # 16x2 LCD over I²C backpack
 from hx711_gpio import HX711         # Load cell amplifier driver
-import motor                         # Stepper (uln2003-style) driver
-from dcmotor import DCMotor          # H-bridge DC motor (kept for future use)
+import motor                         # Stepper (uln2003-style) driver        # H-bridge DC motor (kept for future use)
 
 
 # ============================================================================

@@ -22,7 +22,6 @@ import time
 from hx711_gpio import HX711
 from machine import Pin, PWM
 import motor
-from dcmotor import DCMotor
 
 sf = 1138.6597 #Change after calibrating
 time_closed = 5 #Set by timer, 5 sec used as example
@@ -56,8 +55,6 @@ hx711.set_scale(sf)
 #Setting up stepper motor
 stepper_motor = motor.FullStepMotor.frompins(STEP_IN1, STEP_IN2, STEP_IN3, STEP_IN4)
 
-#Setting up linear actuator
-Lin_act = DCMotor(LIN_IN1, LIN_IN2, LIN_ENA)
 
 while True:
     weight = hx711.get_units()
@@ -66,16 +63,10 @@ while True:
     if weight >= threshold and motor_triggered is False:
         time.sleep(2) #2 second pause before closing door
         stepper_motor.step(steps_to_close)
-        Lin_act.forward(100)
         time.sleep(2) #Tweak sleep time to control how much it extends
-        Lin_act.stop()
         motor_triggered = True
-        
         time.sleep(time_closed)
-
-        Lin_act.backwards(100)
         time.sleep(2) #Tweak sleep time to match sleep time above
-        Lin_act.stop()
         stepper_motor.step(-(steps_to_close))
 
     if weight < threshold:

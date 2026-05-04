@@ -16,7 +16,6 @@ import time
 from hx711_gpio import HX711
 from machine import Pin, PWM
 import motor
-from dcmotor import DCMotor
 
 # ── Config ────────────────────────────────────────────────────────────────────
 SCALE_F         = 1138.6597
@@ -38,7 +37,7 @@ stepper = motor.FullStepMotor.frompins(14, 12, 13, 15)
 LIN_IN1 = Pin(21, Pin.OUT)
 LIN_IN2 = Pin(10, Pin.OUT)
 LIN_ENA = PWM(Pin(11))
-lin_act = DCMotor(LIN_IN1, LIN_IN2, LIN_ENA)
+
 
 # ── Motor helpers ─────────────────────────────────────────────────────────────
 def close_box():
