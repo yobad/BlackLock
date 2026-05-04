@@ -1,4 +1,9 @@
 """
+Author: Gary Explains
+Date: Video uploaded on July 26, 2022
+Description: This file contains a MicroPython driver for SD cards using the SPI bus.
+available at https://www.youtube.com/watch?v=JrYT7aJnP_I
+
 MicroPython driver for SD cards using SPI bus.
 
 Requires an SPI bus and a CS pin.  Provides readblocks and writeblocks
