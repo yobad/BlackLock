@@ -1,18 +1,16 @@
 """
+Author: Boyang Zhang
+Date: March 7 2026
 This code makes the load cell continuously read the weight that is placed above it,
 while printing it out. If the weight placed on it is above a certain threshold, the stepper
-motor will be triggered to close the door of the box. The linear actuator is then triggered
-to lock the door. After a certain time has elapsed (study session length), the linear actuator
-is retracted to unlock the door and the stepper motor will be triggered again in the opposite
+motor will be triggered to close the door of the box. After a certain time has elapsed
+(study session length), the stepper motor will be triggered again in the opposite
 direction to open the door.
 
 This code uses the HX711 amplifier library created by Robert Hammelrath, which can be found in the
 following link: https://github.com/robert-hh/hx711
 It also uses a stepper motor library created by Lars Kellog-Stedman, which can be found in the
 following link: https://github.com/larsks/micropython-stepper-motor
-The linear actuator is controlled via the functions of a DC motor library, which can be found in the
-following link: https://raw.githubusercontent.com/RuiSantosdotme/Random-Nerd-Tutorials/master/Projects/Raspberry-Pi-Pico/MicroPython/dcmotor.py
-
 """
 
 #test
