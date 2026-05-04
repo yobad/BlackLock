@@ -14,8 +14,8 @@ from machine import Pin
 from hx711_gpio import HX711
 import time
 
-data_pin = Pin(5, Pin.IN, pull=Pin.PULL_DOWN)
-clock_pin = Pin(6, Pin.OUT)
+data_pin = Pin(6, Pin.IN, pull=Pin.PULL_DOWN)
+clock_pin = Pin(5, Pin.OUT)
 hx711 = HX711(clock_pin, data_pin)
 
 print("taring...")
