@@ -1,6 +1,14 @@
 '''
-MIT License
+Author: Tyler Peppy
+Date: Last commit on Github was April 9, 2021 by unknown user n0n3nt1ty
+Description: This library provides an interface for controlling a character LCD display
+    (like the common 16x2 or 20x4) using a PCF8574 I/O expander over I2C.
+    It implements the necessary commands to initialize the LCD, send data,
+    and control the backlight.
+This library can be found here:
+https://github.com/T-622/RPI-PICO-I2C-LCD
 
+MIT License
 Copyright (c) 2023 Tyler Peppy
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
