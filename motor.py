@@ -1,6 +1,11 @@
 """
-This library was created by Lars Kellog-Stedman, which can be found
-here: https://github.com/larsks/micropython-stepper-motor/tree/main
+Author: Lars Kellog-Stedman
+Date: Last commit on Github was January 14, 2026 by user larsks
+Description: This library provides a driver for controlling stepper motors using a ULN2003-style driver board.
+ It defines a base Motor class and two specific implementations: FullStepMotor and HalfStepMotor (which means each step moves the motor by half the distance of a full step).
+ The library allows you to control the position of the motor by stepping it a specified number of steps
+ or until it reaches a target position or angle.
+This library can be found here: https://github.com/larsks/micropython-stepper-motor/tree/main
 """
 
 
