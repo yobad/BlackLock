@@ -1,3 +1,11 @@
+'''
+Author: Robert Hammelrath
+Date: Last commit on Github was August 7, 2025 by user robert-hh
+Description: This file implements a driver for the HX711 load cell amplifier using GPIO pins on the Raspberry Pi Pico.
+The HX711 is a popular 24-bit ADC designed for weigh scales and industrial control applications to measure load cell data. This driver allows you to read weight measurements
+from a load cell connected to the HX711.
+This library can be found here: https://github.com/robert-hh/hx711/tree/master
+
 # MIT License
 
 # Copyright (c) 2019 
@@ -21,8 +29,8 @@
 # SOFTWARE.
 
 
-# This library was created by Robert Hammelrath, which can be found here: https://github.com/robert-hh/hx711/tree/master
-
+This library was created by Robert Hammelrath, which can be found here: https://github.com/robert-hh/hx711/tree/master
+'''
 from machine import enable_irq, disable_irq, idle, Pin
 import time
 
