@@ -3,10 +3,10 @@
  BlackLock — main firmware
 ================================================================================
  Project : BlackLock — a phone-lock box for focused study sessions
- Authors : The BlackLock Team
+ Authors : The BlackLock Team, composed of Jérôme Poupart, Boyang Zhang, and Hyeonwoo Ahn
  Date    : May 2, 2026
  Notes   : This file was generated with substantial help from Claude.ai, which based some of his code
-           by code files made by Jérôme Poupart and Bo Yang Zhang. The
+           by code files made by Jérôme Poupart and Boyang Zhang. The
            conversation that produced it can be found at
            https://claude.ai/share/ccf46a7f-43a0-4672-b01e-1f0960541a3e
 
