@@ -4,6 +4,11 @@ Date: April 3, 2026
 Description: This file implements a simple audio player for the Raspberry Pi Pico that reads 8-bit
 Parts of this file were generated with Google Gemini on April 3, 2026.
 Conversation: https://gemini.google.com/share/da4623f59ffe
+***THIS FILE IS ONLY USED TO TEST DIFFERENT SONGS PLAYED THROUGH THE SPEAKER*** 
+NOTE: on line 69, play_wav_8bit("/sd/motivation2.wav") can be changed to play any different songs
+The wav file must be 8-bit and have a sample rate of 16kHz or less to work as intended.
+change the part in "" to the name of the file (with the .wav extension) to play it..
+At last, Files must be uploaded to the SD card before running this code.
 """
 
 
@@ -65,4 +70,4 @@ def play_wav_8bit(filename):
             audio_pin = None
 
 if mount_sd():
-    play_wav_8bit("/sd/Piggi.wav")
+    play_wav_8bit("/sd/motivation2.wav")
