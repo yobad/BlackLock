@@ -412,7 +412,7 @@ def create_ap(ssid, password):
     # Spin until the AP reports active (or timeout).
     timeout = AP_TIMEOUT_S
     while not ap.active() and timeout > 0:
-        time.sleep(0.5)
+        time.sleep(1)
         timeout -= 1
 
     if ap.active():
